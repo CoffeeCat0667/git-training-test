@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# 测试
+.pytest_cache/
+.coverage
+
+# 输出
+output/
+*.jpg
+*.png
+!examples/*.jpg
+!examples/*.png
