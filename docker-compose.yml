@@ -1,0 +1,45 @@
+# ==============================================================================
+# docker-compose.yml — vision-toolkit services
+#
+# Services:
+#   test  — run full test suite with coverage
+#   dev   — interactive development shell
+#   demo  — run example script
+# ==============================================================================
+
+version: "3.9"
+
+services:
+  # ----- test: run test suite -----
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vision-toolkit:latest
+    volumes:
+      - .:/app
+    command: pytest tests/ -v --cov=src --cov-report=term-missing
+
+  # ----- dev: interactive dev shell -----
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: vision-toolkit:dev
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    environment:
+      - PYTHONPATH=/workspace
+      - PYTHONDONTWRITEBYTECODE=1
+    command: bash
+
+  # ----- demo: run example script -----
+  demo:
+    image: vision-toolkit:latest
+    volumes:
+      - ./examples:/app/examples
+      - ./output:/app/output
+    command: python examples/demo.py
