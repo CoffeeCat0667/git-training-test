@@ -1,0 +1,71 @@
+# ==============================================================================
+# docker-compose.yml — vision-toolkit services
+#
+# Services:
+#   test  — run full test suite with coverage
+#   dev   — interactive development shell
+#   demo  — run example script
+# ==============================================================================
+
+version: "3.9"
+
+x-common: &common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: vision-toolkit:latest
+  volumes:
+    - .:/app
+
+services:
+  # ----- app: production web service -----
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vision-toolkit:latest
+    ports:
+      - "${SERVICE_PORT:-8000}:8000"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  # ----- test: run test suite -----
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vision-toolkit:latest
+    volumes:
+      - .:/app
+    command: pytest tests/ -v --cov=src --cov-report=term-missing
+
+  # ----- dev: interactive dev shell -----
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: vision-toolkit:dev
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    environment:
+      - PYTHONPATH=/workspace
+      - PYTHONDONTWRITEBYTECODE=1
+    command: bash
+
+  # ----- demo: run example script -----
+  demo:
+    image: vision-toolkit:latest
+    volumes:
+      - ./examples:/app/examples
+      - ./output:/app/output
+    command: python examples/demo.py
