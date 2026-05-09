@@ -1,0 +1,17 @@
+# systemd/vision-toolkit.logrotate
+# 复制到 /etc/logrotate.d/ 启用日志轮转:
+#   sudo cp systemd/vision-toolkit.logrotate /etc/logrotate.d/vision-toolkit
+
+/opt/vision-toolkit/logs/deploy/*.log {
+    daily
+    rotate 30
+    missingok
+    notifempty
+    compress
+    delaycompress
+    dateext
+    dateformat -%Y%m%d
+    copytruncate
+    create 0640 root root
+    su root root
+}

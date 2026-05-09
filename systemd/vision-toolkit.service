@@ -1,0 +1,30 @@
+# systemd/vision-toolkit.service
+# 复制到 /etc/systemd/system/ 后启用自启:
+#   sudo cp systemd/vision-toolkit.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now vision-toolkit
+
+[Unit]
+Description=vision-toolkit API service
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/vision-toolkit
+ExecStart=/usr/bin/docker compose up app
+ExecStop=/usr/bin/docker compose stop app
+ExecReload=/usr/bin/docker compose restart app
+Restart=on-failure
+RestartSec=15s
+TimeoutStartSec=120
+
+# 日志
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=vision-toolkit
+
+[Install]
+WantedBy=multi-user.target

@@ -65,10 +65,27 @@ pytest tests/ -v
 
 ```
 vision-toolkit/
-├── src/              # 源代码
-├── tests/            # 测试
-├── examples/         # 示例
-└── README.md         # 文档
+├── src/                  # 源代码
+├── tests/                # 测试
+├── examples/             # 示例
+├── scripts/              # 部署脚本
+│   ├── deploy.sh         #   主部署
+│   ├── rollback.sh       #   回滚
+│   ├── status.sh         #   状态
+│   ├── lib/              #   共享库
+│   │   ├── colors.sh     #     颜色常量
+│   │   ├── logger.sh     #     日志
+│   │   ├── preflight.sh  #     前置检查
+│   │   └── utils.sh      #     工具函数
+│   └── config/
+│       └── deploy.conf   #     部署配置
+├── systemd/              # systemd 配置
+│   ├── vision-toolkit.service
+│   └── vision-toolkit.logrotate
+├── Dockerfile
+├── Dockerfile.dev
+├── docker-compose.yml
+└── README.md
 ```
 
 ## 作者
@@ -107,6 +124,49 @@ docker compose run --rm dev
 
 # 运行演示
 docker compose run --rm demo
+```
+
+### 部署脚本
+
+```bash
+# 查看帮助
+./scripts/deploy.sh --help
+
+# 预演（只打印，不执行）
+./scripts/deploy.sh --dry-run
+
+# 本地完整部署
+./scripts/deploy.sh
+
+# 指定镜像标签 + 跳过构建
+./scripts/deploy.sh -t v1.0 --skip-build
+
+# 远程部署
+./scripts/deploy.sh -r myserver.com
+
+# 查看服务状态
+./scripts/status.sh
+./scripts/status.sh --json
+
+# 回滚到上个版本
+./scripts/rollback.sh
+```
+
+### 系统服务（systemd）
+
+```bash
+# 安装 service 文件
+sudo cp systemd/vision-toolkit.service /etc/systemd/system/
+
+# 启用开机自启
+sudo systemctl daemon-reload
+sudo systemctl enable --now vision-toolkit
+
+# 查看状态
+sudo systemctl status vision-toolkit
+
+# 日志轮转
+sudo cp systemd/vision-toolkit.logrotate /etc/logrotate.d/vision-toolkit
 ```
 
 ### 从 GHCR 拉取预构建镜像
